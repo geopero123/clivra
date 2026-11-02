@@ -82,7 +82,9 @@ function EmptyState() {
   const ready = providers.filter((p) => p.state === 'ready' || p.state === 'update-recommended')
   const checking = providers.some((p) => p.state === 'checking')
   return (
-    <div className="mx-auto flex h-full max-w-[640px] flex-col items-center justify-center px-6 pb-24 text-center">
+    <div className="relative h-full">
+    <div className="ambient" aria-hidden><i className="loop" /><i className="loop" /><i className="loop" /></div>
+    <div className="relative mx-auto flex h-full max-w-[640px] flex-col items-center justify-center px-6 pb-24 text-center">
       <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={spring} className="mb-6 flex gap-3">
         {(['claude', 'codex', 'opencode'] as const).map((id, i) => (
           <motion.span key={id} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...spring, delay: 0.06 * i }} className={cn('rounded-xl transition-all duration-300', id === cfg.provider ? 'scale-110' : 'opacity-50 grayscale-[.5]')}>
@@ -110,6 +112,7 @@ function EmptyState() {
           </motion.button>
         ))}
       </div>
+    </div>
     </div>
   )
 }
@@ -212,7 +215,7 @@ function LiveAssistant({ msg }: { msg: StoredMessage }) {
 export function TypingDots({ color = 'var(--accent)' }: { color?: string }) {
   return (
     <div className="flex h-6 items-center gap-1" aria-label="Working">
-      {[0, 1, 2].map((i) => <span key={i} className="size-1.5 rounded-full" style={{ background: color, animation: `dot-bounce 1.1s ${i * 0.14}s infinite ease-in-out` }} />)}
+      {[0, 1, 2].map((i) => <span key={i} className="loop size-1.5 rounded-full" style={{ background: color, animation: `wobble 1.2s ${i * 0.16}s infinite ease-in-out` }} />)}
     </div>
   )
 }

@@ -6,7 +6,7 @@ import {
 import type { Attachment, PermissionMode, ProviderId } from '@shared/types'
 import { PROVIDER_IDS } from '@shared/types'
 import { cn } from '@/lib/cn'
-import { spring } from '@/lib/motion'
+import { spring, springLiquid } from '@/lib/motion'
 import { shortPath } from '@/lib/format'
 import { useApp, useChatConfig } from '@/lib/store'
 import { Button, Kbd, MenuItem, MenuLabel, MenuSep, Modal, Popover, PROVIDER_NAME, ProviderMark, StateBadge, Switch, Spinner } from '@/ui'
@@ -384,7 +384,7 @@ export function Composer({ onHeight }: { onHeight?: (h: number) => void }) {
         onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
-        className={cn('relative rounded-[22px] border bg-[var(--glass)] shadow-[var(--shadow-pop)] backdrop-blur-xl transition-[border-color,box-shadow] duration-200 focus-within:border-[color-mix(in_oklab,var(--accent)_55%,var(--line))] focus-within:shadow-[var(--shadow-pop),0_0_0_4px_var(--accent-soft)]', drag ? 'border-accent' : 'border-line-strong')}
+        className={cn('sheen relative rounded-[22px] border bg-[var(--glass)] shadow-[var(--shadow-pop)] backdrop-blur-xl transition-[border-color,box-shadow] duration-200 focus-within:border-[color-mix(in_oklab,var(--accent)_55%,var(--line))] focus-within:shadow-[var(--shadow-pop),0_0_0_4px_var(--accent-soft)]', cfg.running && 'liquid-ring loop', drag ? 'border-accent' : 'border-line-strong')}
       >
         <AnimatePresence>
           {drag && (
@@ -427,11 +427,11 @@ export function Composer({ onHeight }: { onHeight?: (h: number) => void }) {
           <div className="ml-1.5">
             <AnimatePresence mode="wait" initial={false}>
               {cfg.running ? (
-                <motion.button key="stop" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={spring} onClick={() => void cancel()} aria-label="Stop" title="Stop (Esc)" className="no-drag grid size-8 place-items-center rounded-full bg-fg text-bg active:scale-90">
+                <motion.button key="stop" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={spring} onClick={() => void cancel()} aria-label="Stop" title="Stop (Esc)" className="no-drag grid size-8 place-items-center rounded-full bg-fg text-[var(--bg)] active:scale-90 ripple">
                   <Square size={11} fill="currentColor" />
                 </motion.button>
               ) : (
-                <motion.button key="send" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={spring} onClick={submit} disabled={!canSend} aria-label="Send" title="Send (Enter)" className={cn('no-drag grid size-8 place-items-center rounded-full transition-[background,color,transform] active:scale-90', canSend ? 'bg-accent text-accent-fg shadow-[0_4px_14px_-4px_var(--accent)]' : 'bg-sunken text-faint')}>
+                <motion.button key="send" initial={{ scale: 0.4, opacity: 0, rotate: -40 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.4, opacity: 0 }} transition={springLiquid} onClick={submit} disabled={!canSend} aria-label="Send" title="Send (Enter)" className={cn('ripple on-accent no-drag grid size-8 place-items-center rounded-full transition-[background,color,transform,box-shadow] active:scale-90', canSend ? 'grad-accent text-accent-fg shadow-[0_6px_16px_-4px_var(--accent)] hover:scale-105' : 'bg-sunken text-faint')}>
                   <ArrowUp size={16} strokeWidth={2.4} />
                 </motion.button>
               )}

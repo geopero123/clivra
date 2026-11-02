@@ -4,10 +4,10 @@ import { ChevronRight, FileJson, FileText, FolderGit2, FolderOpen, MoreHorizonta
 import type { ConversationMeta } from '@shared/types'
 import { PROVIDER_IDS } from '@shared/types'
 import { cn } from '@/lib/cn'
-import { base, spring } from '@/lib/motion'
+import { base, springLiquid as spring } from '@/lib/motion'
 import { groupLabel, timeAgo } from '@/lib/format'
 import { useApp } from '@/lib/store'
-import { Kbd, MenuItem, MenuSep, Popover, PROVIDER_COLOR, PROVIDER_NAME, Spinner } from '@/ui'
+import { Kbd, MenuItem, MenuSep, Popover, PROVIDER_COLOR, PROVIDER_NAME } from '@/ui'
 
 const ConvRow = memo(function ConvRow({ c, active }: { c: ConversationMeta; active: boolean }) {
   const open = useApp((s) => s.openConversation)
@@ -34,7 +34,7 @@ const ConvRow = memo(function ConvRow({ c, active }: { c: ConversationMeta; acti
         <button onClick={() => void open(c.id)} className={cn('no-drag relative flex w-full items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-left transition-colors', active ? 'text-fg' : 'text-muted hover:bg-sunken hover:text-fg')}>
           <span className="size-1.5 shrink-0 rounded-full" style={{ background: PROVIDER_COLOR[c.provider], opacity: active ? 1 : 0.55 }} title={PROVIDER_NAME[c.provider]} />
           <span className="min-w-0 flex-1 truncate text-[13px]">{c.title}</span>
-          {c.running ? <Spinner size={11} /> : <span className="text-[11px] text-faint group-hover/row:hidden">{timeAgo(c.updatedAt)}</span>}
+          {c.running ? <span className="blob loop size-3 shrink-0" style={{ ['--c' as string]: PROVIDER_COLOR[c.provider] }} /> : <span className="text-[11px] text-faint group-hover/row:hidden">{timeAgo(c.updatedAt)}</span>}
         </button>
       )}
       {!editing && (
@@ -121,8 +121,8 @@ export function Sidebar({ open }: { open: boolean }) {
       <div className="flex h-full flex-col" style={{ width: current }}>
         <div className={cn('drag h-11 shrink-0', platform === 'darwin' && 'pl-[84px]')} />
         <div className="space-y-1 px-2.5 pb-2">
-          <button onClick={() => newChat()} className="no-drag group flex w-full items-center gap-2.5 rounded-[11px] border border-line bg-raised px-3 py-2 text-[13px] font-medium shadow-[var(--shadow-card)] transition hover:border-line-strong active:scale-[0.98]">
-            <span className="grid size-5 place-items-center rounded-md bg-accent text-accent-fg"><Plus size={13} strokeWidth={2.6} /></span>
+          <button onClick={() => newChat()} className="ripple sheen no-drag group flex w-full items-center gap-2.5 rounded-[11px] border border-line bg-raised px-3 py-2 text-[13px] font-medium shadow-[var(--shadow-card)] transition hover:border-line-strong active:scale-[0.98]">
+            <span className="grad-accent grid size-5 place-items-center rounded-md text-accent-fg"><Plus size={13} strokeWidth={2.6} /></span>
             New chat
             <span className="ml-auto opacity-0 transition-opacity group-hover:opacity-100"><Kbd>Ctrl N</Kbd></span>
           </button>

@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { AlertCircle, FileText, OctagonX, ZapOff } from 'lucide-react'
 import type { Block } from '@shared/events'
 import type { StoredMessage } from '@shared/types'
-import { base } from '@/lib/motion'
+import { base, springLiquid } from '@/lib/motion'
 import { duration } from '@/lib/format'
 import { PROVIDER_NAME, ProviderMark } from '@/ui'
 import { CopyButton, Markdown } from './Markdown'
@@ -44,7 +44,7 @@ export const MessageView = memo(function MessageView({ msg, animate }: { msg: St
   if (msg.role === 'user') {
     const text = msg.blocks.map((b) => (b.kind === 'text' ? b.text : '')).join('')
     return (
-      <motion.div initial={animate ? { opacity: 0, y: 10 } : false} animate={{ opacity: 1, y: 0 }} transition={base} className="flex flex-col items-end gap-2 py-3">
+      <motion.div initial={animate ? { opacity: 0, y: 14, scale: 0.96, filter: 'blur(6px)' } : false} animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }} transition={springLiquid} style={{ transformOrigin: 'bottom right' }} className="flex flex-col items-end gap-2 py-3">
         {!!msg.attachments?.length && (
           <div className="flex max-w-[80%] flex-wrap justify-end gap-2">
             {msg.attachments.map((a) => (

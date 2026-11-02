@@ -7,7 +7,7 @@ import {
 import { createPortal } from 'react-dom'
 import type { ProviderId, ProviderState } from '@shared/types'
 import { cn } from '@/lib/cn'
-import { fast, pop, spring } from '@/lib/motion'
+import { fast, pop, spring, springLiquid } from '@/lib/motion'
 import { useApp } from '@/lib/store'
 
 /* ---------- Buttons ---------- */
@@ -21,11 +21,11 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
       ref={ref}
       {...p}
       className={cn(
-        'no-drag inline-flex shrink-0 select-none items-center justify-center gap-2 rounded-[10px] font-medium transition-[background,box-shadow,transform,opacity,color] duration-150 ease-out active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45',
+        'ripple no-drag inline-flex shrink-0 select-none items-center justify-center gap-2 rounded-[10px] font-medium transition-[background,box-shadow,transform,opacity,color] duration-150 ease-out active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45',
         size === 'sm' && 'h-7 px-2.5 text-[12.5px]',
         size === 'md' && 'h-8 px-3 text-[13px]',
         size === 'lg' && 'h-10 px-4 text-sm',
-        variant === 'primary' && 'bg-accent text-accent-fg shadow-[0_1px_0_rgba(255,255,255,.18)_inset,0_4px_14px_-4px_color-mix(in_oklab,var(--accent)_70%,transparent)] hover:brightness-110',
+        variant === 'primary' && 'grad-accent on-accent text-accent-fg shadow-[0_1px_0_rgba(255,255,255,.22)_inset,0_6px_18px_-6px_color-mix(in_oklab,var(--accent)_75%,transparent)] hover:brightness-110',
         variant === 'secondary' && 'border border-line bg-raised text-fg shadow-[var(--shadow-card)] hover:border-line-strong hover:bg-[color-mix(in_oklab,var(--raised)_92%,var(--fg))]',
         variant === 'outline' && 'border border-line-strong text-fg hover:bg-sunken',
         variant === 'ghost' && 'text-muted hover:bg-sunken hover:text-fg',
@@ -44,7 +44,7 @@ export const IconButton = forwardRef<HTMLButtonElement, BtnProps & { label: stri
       title={label}
       {...p}
       className={cn(
-        'no-drag inline-grid size-8 shrink-0 place-items-center rounded-[10px] text-muted transition-[background,color,transform] duration-150 hover:bg-sunken hover:text-fg active:scale-90 disabled:opacity-40',
+        'ripple no-drag inline-grid size-8 shrink-0 place-items-center rounded-[10px] text-muted transition-[background,color,transform] duration-150 hover:bg-sunken hover:text-fg active:scale-90 disabled:opacity-40',
         active && 'bg-accent-soft text-accent hover:bg-accent-soft hover:text-accent',
         className
       )}
@@ -69,7 +69,7 @@ export function Switch({ checked, onChange, disabled, label }: { checked: boolea
       onClick={() => onChange(!checked)}
       className={cn('no-drag relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-200 disabled:opacity-40', checked ? 'bg-accent' : 'bg-line-strong')}
     >
-      <motion.span layout transition={spring} className="absolute top-[3px] size-4 rounded-full bg-white shadow" style={{ left: checked ? 19 : 3 }} />
+      <motion.span layout whileTap={{ width: 22 }} transition={springLiquid} className="absolute top-[3px] h-4 w-4 rounded-full bg-white shadow" style={checked ? { right: 3 } : { left: 3 }} />
     </button>
   )
 }
@@ -88,7 +88,7 @@ export function Segmented<T extends string>({ value, options, onChange, classNam
           onClick={() => onChange(o.value)}
           className={cn('relative rounded-[9px] px-2.5 py-1 text-[12.5px] font-medium transition-colors disabled:opacity-40', value === o.value ? 'text-fg' : 'text-muted hover:text-fg')}
         >
-          {value === o.value && <motion.span layoutId={id} transition={spring} className="absolute inset-0 rounded-[9px] border border-line bg-raised shadow-[var(--shadow-card)]" />}
+          {value === o.value && <motion.span layoutId={id} transition={springLiquid} className="absolute inset-0 rounded-[9px] border border-line bg-raised shadow-[var(--shadow-card)]" />}
           <span className="relative">{o.label}</span>
         </button>
       ))}

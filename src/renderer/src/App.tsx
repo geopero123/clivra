@@ -30,7 +30,7 @@ function useAppearance() {
       const dark = a.theme === 'dark' || (a.theme === 'system' && mq.matches)
       const root = document.documentElement
       root.dataset.theme = dark ? 'dark' : 'light'
-      root.dataset.motion = a.motion === 'off' ? 'off' : 'full'
+      root.dataset.motion = a.motion
       root.style.setProperty('--accent', a.accent)
       root.style.setProperty('--accent-fg', luminance(a.accent) > 0.45 ? '#16141a' : '#ffffff')
       root.style.setProperty('--font-scale', String(a.fontScale * (a.density === 'compact' ? 0.94 : 1)))
@@ -64,6 +64,25 @@ function useShortcuts(toggleSidebar: () => void) {
   }, [newChat, setView, togglePanel, setPalette, toggleSidebar])
 }
 
+/** Sets the ripple origin from the pointer and replays the wave on any .ripple element. */
+function useRipple() {
+  useEffect(() => {
+    const down = (e: PointerEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest?.('.ripple') as HTMLElement | null
+      if (!el || document.documentElement.dataset.motion !== 'full') return
+      const r = el.getBoundingClientRect()
+      el.style.setProperty('--rx', `${e.clientX - r.left}px`)
+      el.style.setProperty('--ry', `${e.clientY - r.top}px`)
+      el.classList.remove('rippling')
+      void el.offsetWidth
+      el.classList.add('rippling')
+      el.addEventListener('animationend', () => el.classList.remove('rippling'), { once: true })
+    }
+    window.addEventListener('pointerdown', down, true)
+    return () => window.removeEventListener('pointerdown', down, true)
+  }, [])
+}
+
 export default function App() {
   const ready = useApp((s) => s.ready)
   const view = useApp((s) => s.view)
@@ -73,6 +92,7 @@ export default function App() {
   const platform = useApp((s) => s.info.platform)
   const toggleSidebar = () => void setSettings({ sidebar: { collapsed: sidebarOpen } } as never)
   useAppearance()
+  useRipple()
   useShortcuts(toggleSidebar)
   const [booted, setBooted] = useState(false)
   useEffect(() => {
