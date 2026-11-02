@@ -1,0 +1,10 @@
+import { launch, newUserData } from './lib.mjs'
+const ud = newUserData()
+const { app, page, errors } = await launch(ud)
+await page.setViewportSize({ width: 1280, height: 840 }).catch(() => {})
+await page.waitForTimeout(2500)
+const providers = await page.evaluate(() => window.clivra.providers.list())
+console.log('PROVIDERS', providers.map((p) => `${p.id}:${p.state}:${p.version}`).join(' | '))
+await page.screenshot({ path: process.env.SHOT_DIR + '/01-empty.png' })
+console.log('ERRORS', JSON.stringify(errors))
+await app.close()
