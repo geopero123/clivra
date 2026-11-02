@@ -25,7 +25,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
         size === 'sm' && 'h-7 px-2.5 text-[12.5px]',
         size === 'md' && 'h-8 px-3 text-[13px]',
         size === 'lg' && 'h-10 px-4 text-sm',
-        variant === 'primary' && 'grad-accent on-accent text-accent-fg shadow-[0_1px_0_rgba(255,255,255,.22)_inset,0_6px_18px_-6px_color-mix(in_oklab,var(--accent)_75%,transparent)] hover:brightness-110',
+        variant === 'primary' && 'on-accent bg-accent text-accent-fg shadow-[0_1px_0_rgba(255,255,255,.18)_inset,0_1px_2px_rgba(0,0,0,.2)] hover:brightness-110',
         variant === 'secondary' && 'border border-line bg-raised text-fg shadow-[var(--shadow-card)] hover:border-line-strong hover:bg-[color-mix(in_oklab,var(--raised)_92%,var(--fg))]',
         variant === 'outline' && 'border border-line-strong text-fg hover:bg-sunken',
         variant === 'ghost' && 'text-muted hover:bg-sunken hover:text-fg',

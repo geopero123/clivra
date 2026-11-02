@@ -8,7 +8,7 @@ import { base, spring } from '@/lib/motion'
 import { useApp } from '@/lib/store'
 import { Button, Kbd, PROVIDER_NAME, ProviderMark, Row, Section, Segmented, StateBadge, Switch } from '@/ui'
 
-const ACCENTS = ['#7c6cf0', '#e0734a', '#3fb67a', '#4a9fe0', '#d9628b', '#d9a441']
+const ACCENTS = ['#2f54eb', '#0f9d7a', '#e5484d', '#d97706', '#7c3aed', '#3f3f46']
 
 const SECTIONS = [
   { id: 'appearance', label: 'Appearance', icon: Palette },

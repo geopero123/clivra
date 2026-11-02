@@ -1,7 +1,7 @@
 import type { BrainGraph, BrainKind, BrainNode } from '@shared/types'
 
 export const KIND_COLOR: Record<BrainKind, string> = {
-  core: '#ffffff', provider: '#7c6cf0', project: '#f5c46b', model: '#b98cf5', tool: '#5fd8c0', memory: '#ff8fb1', category: '#ff6b9a', chat: '#8fb7ff'
+  core: '#e8e8ec', provider: '#2f54eb', project: '#d4a72c', model: '#8b7cf6', tool: '#22a389', memory: '#d9557f', category: '#c2416d', chat: '#5b8def'
 }
 export const PROVIDER_HUE: Record<string, string> = { claude: '#e08a5b', codex: '#3fb68b', opencode: '#5aa0ee' }
 
@@ -353,11 +353,11 @@ export class BrainEngine {
       const dim = focusN && !near.has(n)
       const breathe = this.animate ? 1 + Math.sin(t / 900 + n.x * 0.01) * 0.05 : 1
       const r = n.r * breathe * (1 + n.flash * 0.35)
-      const glow = r * (3.2 + n.flash * 2)
+      const glow = r * (2 + n.flash * 1.6)
       const rg = g.createRadialGradient(n.x, n.y, r * 0.2, n.x, n.y, glow)
       rg.addColorStop(0, n.color)
       rg.addColorStop(1, 'transparent')
-      g.globalAlpha = (dim ? 0.12 : 0.32 + n.flash * 0.5)
+      g.globalAlpha = dim ? 0.06 : 0.16 + n.flash * 0.4
       g.fillStyle = rg
       g.beginPath()
       g.arc(n.x, n.y, glow, 0, 6.2832)
@@ -374,7 +374,7 @@ export class BrainEngine {
     }
     g.globalCompositeOperation = 'source-over'
     g.globalAlpha = 1
-    g.font = `${11 / Math.sqrt(this.cam.k)}px Inter Variable, system-ui, sans-serif`
+    g.font = `${11 / Math.sqrt(this.cam.k)}px Geist Variable, system-ui, sans-serif`
     g.textAlign = 'center'
     for (const n of this.nodes) {
       if (n.hidden) continue

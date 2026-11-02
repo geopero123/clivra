@@ -83,7 +83,6 @@ function EmptyState() {
   const checking = providers.some((p) => p.state === 'checking')
   return (
     <div className="relative h-full">
-    <div className="ambient" aria-hidden><i className="loop" /><i className="loop" /><i className="loop" /></div>
     <div className="relative mx-auto flex h-full max-w-[640px] flex-col items-center justify-center px-6 pb-24 text-center">
       <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={spring} className="mb-6 flex gap-3">
         {(['claude', 'codex', 'opencode'] as const).map((id, i) => (

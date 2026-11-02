@@ -43,7 +43,7 @@ export function TerminalPanel() {
     creating.current = true
     try {
       const { id, shell } = await window.clivra.terminal.create(cwdRef.current)
-      const term = new Terminal({ fontFamily: '"JetBrains Mono Variable", ui-monospace, monospace', fontSize, cursorBlink: true, allowTransparency: true, scrollback: 8000, theme: themeColors(), allowProposedApi: true })
+      const term = new Terminal({ fontFamily: '"Geist Mono Variable", ui-monospace, monospace', fontSize, cursorBlink: true, allowTransparency: true, scrollback: 8000, theme: themeColors(), allowProposedApi: true })
       const fit = new FitAddon()
       term.loadAddon(fit)
       const el = document.createElement('div')

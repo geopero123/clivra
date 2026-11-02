@@ -431,7 +431,7 @@ export function Composer({ onHeight }: { onHeight?: (h: number) => void }) {
                   <Square size={11} fill="currentColor" />
                 </motion.button>
               ) : (
-                <motion.button key="send" initial={{ scale: 0.4, opacity: 0, rotate: -40 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.4, opacity: 0 }} transition={springLiquid} onClick={submit} disabled={!canSend} aria-label="Send" title="Send (Enter)" className={cn('ripple on-accent no-drag grid size-8 place-items-center rounded-full transition-[background,color,transform,box-shadow] active:scale-90', canSend ? 'grad-accent text-accent-fg shadow-[0_6px_16px_-4px_var(--accent)] hover:scale-105' : 'bg-sunken text-faint')}>
+                <motion.button key="send" initial={{ scale: 0.4, opacity: 0, rotate: -40 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.4, opacity: 0 }} transition={springLiquid} onClick={submit} disabled={!canSend} aria-label="Send" title="Send (Enter)" className={cn('ripple on-accent no-drag grid size-8 place-items-center rounded-full transition-[background,color,transform,box-shadow] active:scale-90', canSend ? 'bg-accent text-accent-fg hover:scale-105' : 'bg-sunken text-faint')}>
                   <ArrowUp size={16} strokeWidth={2.4} />
                 </motion.button>
               )}

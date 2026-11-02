@@ -250,7 +250,7 @@ export interface MemoryStatus {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  appearance: { theme: 'system', accent: '#d97757', motion: 'full', density: 'comfortable', fontScale: 1 },
+  appearance: { theme: 'system', accent: '#2f54eb', motion: 'full', density: 'comfortable', fontScale: 1 },
   defaults: { provider: 'claude', permissionMode: 'ask', model: {}, effort: {} },
   instructions: '',
   providers: { executables: {} },

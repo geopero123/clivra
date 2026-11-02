@@ -169,7 +169,7 @@ export function Donut({ items, total, unit }: { items: { label: string; value: n
             return el
           })}
         </svg>
-        <div className="pointer-events-none absolute inset-0 grid place-content-center text-center"><b className="text-[24px] font-semibold tabular-nums leading-none">{fmt(shown)}</b><span className="mt-1 text-[11.5px] text-muted">{hi === null ? unit : items[hi].label}</span></div>
+        <div className="pointer-events-none absolute inset-0 grid place-content-center text-center"><b className="font-display text-[26px] tabular-nums leading-none">{fmt(shown)}</b><span className="mt-1 text-[11.5px] text-muted">{hi === null ? unit : items[hi].label}</span></div>
       </div>
       <div className="grid min-w-[150px] flex-1 gap-2 text-[12.5px]">
         {items.map((it, i) => <div key={it.label} onPointerEnter={() => setHi(i)} onPointerLeave={() => setHi(null)} className="grid grid-cols-[auto_1fr_auto] items-center gap-2"><i className="size-2.5 rounded-[3px]" style={{ background: it.color }} />{it.label}<span className="tabular-nums text-muted">{fmt(it.value)} · {total ? Math.round((it.value / total) * 100) : 0}%</span></div>)}
@@ -208,7 +208,7 @@ export function HBars({ rows }: { rows: { label: string; value: number; sub?: st
       {rows.map((r, i) => (
         <div key={r.label} className="grid gap-1.5">
           <div className="flex justify-between gap-3 text-[12.5px]"><b className="min-w-0 truncate font-medium">{r.label}</b><span className="shrink-0 tabular-nums text-muted">{r.value.toLocaleString()}{r.sub ? ` · ${r.sub}` : ''}</span></div>
-          <div className="h-2 overflow-hidden rounded-full bg-sunken"><div className="h-full rounded-full" style={{ width: on ? `${(r.value / mx) * 100}%` : 0, background: `linear-gradient(90deg, color-mix(in oklab, ${r.color} 70%, white), ${r.color})`, transition: `width 1.1s cubic-bezier(.34,1.56,.64,1) ${i * 80}ms` }} /></div>
+          <div className="h-2 overflow-hidden rounded-full bg-sunken"><div className="h-full rounded-full" style={{ width: on ? `${(r.value / mx) * 100}%` : 0, background: r.color, transition: `width 1.1s cubic-bezier(.34,1.56,.64,1) ${i * 80}ms` }} /></div>
         </div>
       ))}
     </div>

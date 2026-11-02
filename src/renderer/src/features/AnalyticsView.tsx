@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { Flame, RefreshCw, Check } from 'lucide-react'
+import { RefreshCw, Check } from 'lucide-react'
 import type { Analytics, ProviderId } from '@shared/types'
 import { PROVIDER_IDS } from '@shared/types'
 import { base, fadeUp } from '@/lib/motion'
@@ -10,11 +10,18 @@ import { AreaLine, CalendarHeat, Card, CountUp, Donut, HBars, HeatHours, Legend,
 
 const RANGES = [{ value: '7', label: '7 days' }, { value: '30', label: '30 days' }, { value: '90', label: '90 days' }, { value: '365', label: 'Year' }]
 
+/** A small vessel whose liquid level shows how close the current streak is to the record. */
+function Vessel({ level }: { level: number }) {
+  const [h, setH] = useState(0)
+  useEffect(() => { const r = requestAnimationFrame(() => setH(Math.max(0, Math.min(1, level)))); return () => cancelAnimationFrame(r) }, [level])
+  return <div className="vessel h-[92px] w-[74px] shrink-0" role="img" aria-label={`Streak at ${Math.round(level * 100)}% of record`}><div className="liq" style={{ height: `${h * 100}%` }} /></div>
+}
+
 function Kpi({ label, value, format, spark, color, hint }: { label: string; value: number; format?: (n: number) => string; spark: number[]; color: string; hint?: string }) {
   return (
     <motion.div variants={fadeUp} className="rounded-3xl border border-line bg-surface p-4 shadow-[var(--shadow-card)]">
       <div className="text-[12px] font-medium text-muted">{label}</div>
-      <div className="mt-1 text-[26px] font-semibold leading-tight tracking-tight tabular-nums"><CountUp value={value} format={format} /></div>
+      <div className="mt-1 font-display text-[28px] leading-tight tabular-nums"><CountUp value={value} format={format} /></div>
       <div className="text-[11.5px] text-faint">{hint ?? ' '}</div>
       <Sparkline values={spark} color={color} />
     </motion.div>
@@ -82,13 +89,10 @@ export default function AnalyticsView() {
         {/* Streak */}
         <motion.div variants={fadeUp} className="mt-6 grid gap-4 rounded-3xl border border-line bg-surface p-6 shadow-[var(--shadow-card)] md:grid-cols-[auto_1fr]">
           <div className="flex items-center gap-5">
-            <div className="relative grid size-24 place-items-center">
-              <span className="flame absolute inset-2" style={{ opacity: st.current ? 1 : 0.25 }} />
-              <Flame size={26} className="relative text-white drop-shadow" />
-            </div>
+            <Vessel level={st.longest ? st.current / st.longest : 0} />
             <div>
-              <div className="text-[44px] font-semibold leading-none tracking-tight tabular-nums"><CountUp value={st.current} /></div>
-              <div className="mt-1 text-[13px] text-muted">day streak</div>
+              <div className="font-display text-[52px] leading-none tabular-nums"><CountUp value={st.current} /></div>
+              <div className="mt-1 text-[13px] text-muted">day streak{st.longest ? ` · of a ${st.longest}-day record` : ''}</div>
               <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-sunken px-2.5 py-1 text-[11.5px] text-muted">
                 {st.todayActive ? <><Check size={12} className="text-ok" /> Today counted</> : st.current ? 'Prompt today to keep it going' : 'Start one today'}
               </div>
@@ -105,7 +109,7 @@ export default function AnalyticsView() {
         </motion.div>
 
         <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))]">
-          <Kpi label="Tokens" value={tokens} format={fmt} spark={days.map((d) => d.tokens)} color="var(--cyan, #4cc9f0)" hint={`${fmt(tokens / Math.max(1, n))} / day`} />
+          <Kpi label="Tokens" value={tokens} format={fmt} spark={days.map((d) => d.tokens)} color="var(--fg)" hint={`${fmt(tokens / Math.max(1, n))} / day`} />
           <Kpi label="Chats" value={chats.length} spark={days.map((d) => a.sessions.filter((s) => isoOf(s.end) === d.day).length)} color="var(--accent)" hint="started or continued" />
           <Kpi label="Prompts" value={prompts} spark={days.map((d) => d.prompts)} color="var(--ok)" hint={chats.length ? `${(prompts / chats.length).toFixed(1)} per chat` : ''} />
           <Kpi label="Cache hits" value={tin + cache ? (cache / (tin + cache)) * 100 : 0} format={(v) => `${v.toFixed(0)}%`} spark={days.map((d) => (d.tin + d.cache ? d.cache / (d.tin + d.cache) : 0))} color="var(--warn)" hint="of input reused" />
