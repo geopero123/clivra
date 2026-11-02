@@ -1,6 +1,6 @@
 import { memo, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ChevronRight, FileJson, FileText, FolderGit2, FolderOpen, MoreHorizontal, Pencil, Pin, PinOff, Plus, Search, Settings as Gear, Sparkles, Trash2, Cable, X } from 'lucide-react'
+import { Activity, Network, ChevronRight, FileJson, FileText, FolderGit2, FolderOpen, MoreHorizontal, Pencil, Pin, PinOff, Plus, Search, Settings as Gear, Sparkles, Trash2, Cable, X } from 'lucide-react'
 import type { ConversationMeta } from '@shared/types'
 import { PROVIDER_IDS } from '@shared/types'
 import { cn } from '@/lib/cn'
@@ -132,7 +132,7 @@ export function Sidebar({ open }: { open: boolean }) {
           </button>
         </div>
         <nav className="space-y-px px-2.5 pb-2">
-          {([['providers', Cable, 'Providers'], ['skills', Sparkles, 'Skills']] as const).map(([id, Icon, label]) => (
+          {([['providers', Cable, 'Providers'], ['skills', Sparkles, 'Skills'], ['analytics', Activity, 'Analytics'], ['brain', Network, 'Brain']] as const).map(([id, Icon, label]) => (
             <button key={id} onClick={() => setView(id)} className={cn('no-drag relative flex w-full items-center gap-2.5 rounded-[10px] px-3 py-1.5 text-[13px] transition-colors', view === id ? 'text-fg' : 'text-muted hover:bg-sunken hover:text-fg')}>
               {view === id && <motion.span layoutId="nav-active" transition={spring} className="absolute inset-0 rounded-[10px] bg-raised ring-1 ring-line shadow-[var(--shadow-card)]" />}
               <Icon size={15} className="relative" /> <span className="relative">{label}</span>

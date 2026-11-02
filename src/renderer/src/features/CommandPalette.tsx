@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { Cable, MessageSquare, Moon, Plus, Search, Settings as Gear, Sparkles, SquareTerminal, Sun } from 'lucide-react'
+import { Activity, Network, Cable, MessageSquare, Moon, Plus, Search, Settings as Gear, Sparkles, SquareTerminal, Sun } from 'lucide-react'
 import type { SearchHit } from '@shared/types'
 import { cn } from '@/lib/cn'
 import { spring } from '@/lib/motion'
@@ -48,6 +48,8 @@ export function CommandPalette() {
       { id: 'new', label: 'New chat', hint: 'Ctrl N', icon: <Plus size={15} />, run: () => newChat() },
       { id: 'prov', label: 'Providers', icon: <Cable size={15} />, run: () => setView('providers') },
       { id: 'skills', label: 'Skills', icon: <Sparkles size={15} />, run: () => setView('skills') },
+      { id: 'ana', label: 'Analytics', icon: <Activity size={15} />, run: () => setView('analytics') },
+      { id: 'brain', label: 'Brain', icon: <Network size={15} />, run: () => setView('brain') },
       { id: 'set', label: 'Settings', hint: 'Ctrl ,', icon: <Gear size={15} />, run: () => setView('settings') },
       { id: 'term', label: 'Toggle terminal', hint: 'Ctrl `', icon: <SquareTerminal size={15} />, run: () => toggle('terminal') },
       { id: 'theme', label: theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', icon: theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />, run: () => void setSettings({ appearance: { theme: theme === 'dark' ? 'light' : 'dark' } } as any) }

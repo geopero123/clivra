@@ -26,7 +26,7 @@ assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), 
 // choose the project folder in the composer
 await page.getByTitle(/^\/root|^\/home|^\/tmp|.*/).first().waitFor().catch(() => {})
 await page.locator('button[title="/root"], button:has(svg.lucide-folder-open)').first().click()
-await page.locator('div.backdrop-blur-xl button', { hasText: proj.split('/').pop() }).first().click()
+await page.locator('[data-popover] button', { hasText: proj.split('/').pop() }).first().click()
 await page.waitForTimeout(400)
 
 // wait for model list to come from the real CLI

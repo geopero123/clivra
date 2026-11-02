@@ -50,6 +50,12 @@ const api: ClivraAPI = {
     status: () => inv('mem:status'),
     onChanged: (cb) => on('mem:changed', cb)
   },
+  analytics: {
+    get: () => inv('stats:get'),
+    refresh: () => inv('stats:refresh'),
+    onUpdate: (cb) => on('stats:update', cb)
+  },
+  brain: { get: () => inv('brain:get') },
   settings: { get: () => inv('settings:get'), set: (p) => inv('settings:set', p) },
   terminal: {
     create: (cwd) => inv('term:create', cwd),

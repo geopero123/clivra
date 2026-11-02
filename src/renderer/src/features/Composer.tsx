@@ -384,7 +384,7 @@ export function Composer({ onHeight }: { onHeight?: (h: number) => void }) {
         onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
-        className={cn('sheen relative rounded-[22px] border bg-[var(--glass)] shadow-[var(--shadow-pop)] backdrop-blur-xl transition-[border-color,box-shadow] duration-200 focus-within:border-[color-mix(in_oklab,var(--accent)_55%,var(--line))] focus-within:shadow-[var(--shadow-pop),0_0_0_4px_var(--accent-soft)]', cfg.running && 'liquid-ring loop', drag ? 'border-accent' : 'border-line-strong')}
+        className={cn('sheen relative rounded-[22px] border bg-[var(--glass)] shadow-[var(--shadow-pop)] transition-[border-color,box-shadow] duration-200 focus-within:border-[color-mix(in_oklab,var(--accent)_55%,var(--line))] focus-within:shadow-[var(--shadow-pop),0_0_0_4px_var(--accent-soft)]', cfg.running && 'liquid-ring loop', drag ? 'border-accent' : 'border-line-strong')}
       >
         <AnimatePresence>
           {drag && (

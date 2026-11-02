@@ -1,5 +1,5 @@
 import type {
-  ActivityEntry, Attachment, MemoryItem, MemoryStatus, ConversationMeta, GitInfo, ModelInfo, PermissionMode, Project, ProviderId,
+  ActivityEntry, Analytics, Attachment, BrainGraph, MemoryItem, MemoryStatus, ConversationMeta, GitInfo, ModelInfo, PermissionMode, Project, ProviderId,
   ProviderStatus, SearchHit, SendRequest, Settings, SkillInfo, StoredMessage
 } from './types'
 import type { RunEnvelope } from './events'
@@ -57,6 +57,12 @@ export interface ClivraAPI {
     status(): Promise<MemoryStatus>
     onChanged(cb: (items: MemoryItem[], status: MemoryStatus) => void): () => void
   }
+  analytics: {
+    get(): Promise<Analytics>
+    refresh(): Promise<Analytics>
+    onUpdate(cb: (a: Analytics) => void): () => void
+  }
+  brain: { get(): Promise<BrainGraph> }
   settings: {
     get(): Promise<Settings>
     set(patch: Partial<Settings>): Promise<Settings>

@@ -7,7 +7,7 @@ import type { AgentState, Block, RunEnvelope } from '@shared/events'
 import { applyEvent } from '@shared/events'
 import type { ConversationPatch } from '@shared/ipc'
 
-export type View = 'chat' | 'providers' | 'skills' | 'settings'
+export type View = 'chat' | 'providers' | 'skills' | 'analytics' | 'brain' | 'settings'
 
 export interface LiveRun {
   runId: string
@@ -118,9 +118,15 @@ export const useApp = create<State>((set, get) => ({
   scrollTick: 0,
 
   async boot() {
-    const [settings, info, providers, conversations, projects] = await Promise.all([
-      api().settings.get(), api().app.info(), api().providers.list(), api().conversations.list(), api().projects.list()
-    ])
+    const step = (pct: number, msg: string) => (window as unknown as { __splash?: { set(p: number, m: string): void } }).__splash?.set(pct, msg)
+    step(12, 'Opening your workspace')
+    const [settings, info] = await Promise.all([api().settings.get(), api().app.info()])
+    step(38, 'Loading conversations')
+    const [conversations, projects] = await Promise.all([api().conversations.list(), api().projects.list()])
+    step(68, 'Waking your agents')
+    // Detection runs in the background after first paint; this is only the cached/placeholder status.
+    const providers = await api().providers.list()
+    step(90, 'Almost there')
     set({
       settings, info, providers, conversations, projects, ready: true,
       draft: { provider: settings.defaults.provider, model: settings.defaults.model[settings.defaults.provider] ?? null, effort: settings.defaults.effort[settings.defaults.provider] ?? null, permissionMode: settings.defaults.permissionMode, cwd: info.home, projectId: null }
@@ -170,8 +176,8 @@ export const useApp = create<State>((set, get) => ({
       if (git) void get().refreshGit(git)
     })
 
-    // Initial model list for the default provider (lazy for the others).
-    void get().loadModels(get().draft.provider)
+    // Initial model list for the default provider (lazy for the others); deferred so first paint stays light.
+    setTimeout(() => void get().loadModels(get().draft.provider), 1200)
     if (get().draft.cwd) void get().refreshGit(get().draft.cwd)
   },
 

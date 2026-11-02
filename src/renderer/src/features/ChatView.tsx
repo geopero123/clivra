@@ -190,7 +190,7 @@ function MessageList({ composerH }: { composerH: number }) {
       </div>
       <AnimatePresence>
         {away && (
-          <motion.button initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.9 }} transition={spring} onClick={() => { stick.current = true; toBottom(true) }} aria-label="Scroll to latest" className="no-drag absolute left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line-strong bg-[var(--glass)] shadow-[var(--shadow-pop)] backdrop-blur-xl" style={{ bottom: composerH + 20 }}>
+          <motion.button initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.9 }} transition={spring} onClick={() => { stick.current = true; toBottom(true) }} aria-label="Scroll to latest" className="no-drag absolute left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line-strong bg-[var(--glass)] shadow-[var(--shadow-pop)]" style={{ bottom: composerH + 20 }}>
             <ArrowDown size={16} />
           </motion.button>
         )}

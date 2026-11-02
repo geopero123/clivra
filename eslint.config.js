@@ -18,7 +18,11 @@ export default tseslint.config(
     languageOptions: { globals: globals.node }
   },
   {
-    files: ['tests/e2e/**/*.mjs'],
+    files: ['src/renderer/public/**/*.js'],
+    languageOptions: { globals: globals.browser }
+  },
+  {
+    files: ['tests/e2e/**/*.mjs', 'demo/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } }
   },
   {

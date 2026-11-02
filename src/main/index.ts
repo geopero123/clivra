@@ -15,6 +15,8 @@ import { gitDiff, gitInfo } from './services/git'
 import { killAllTracked } from './services/proc'
 import { toMarkdown } from './services/export'
 import { MemoryService } from './services/memory'
+import { StatsService } from './services/stats'
+import { buildBrain } from './services/brain'
 
 const isDev = !app.isPackaged && !!process.env.ELECTRON_RENDERER_URL
 let win: BrowserWindow | null = null
@@ -23,6 +25,7 @@ let registry: ProviderRegistry
 let runs: RunManager
 let terminals: TerminalService
 let memory: MemoryService
+let stats: StatsService
 let quitting = false
 
 const send = (channel: string, ...args: unknown[]) => {
@@ -183,6 +186,14 @@ function registerIpc(): void {
   handle('proj:git', (_e, p: string) => gitInfo(assertDir(p)))
   handle('proj:gitDiff', (_e, p: string) => gitDiff(assertDir(p)))
 
+  // analytics + brain
+  handle('stats:get', () => stats.snapshot())
+  handle('stats:refresh', async () => (await stats.scan(), stats.snapshot()))
+  handle('brain:get', async () => {
+    await stats.scan()
+    return buildBrain(stats.snapshot(), store.listMemories(), store.listConversations(runs.runningIds()), store.listProjects())
+  })
+
   // memory
   handle('mem:list', () => store.listMemories())
   handle('mem:remove', (_e, id: number) => (store.deleteMemory(Number(id)), send('mem:changed', store.listMemories(), memory.getStatus())))
@@ -249,6 +260,8 @@ else {
     registry = new ProviderRegistry(store)
     registry.listeners.add((s) => send('providers:status', s))
     terminals = new TerminalService(() => (win && !win.isDestroyed() ? win.webContents : null))
+    stats = new StatsService({ get: (p) => store.getNative(p), set: (p, s, m, sum) => store.setNative(p, s, m, sum), prune: (k) => store.pruneNative(k) }, () => store.clivraStats())
+    stats.listeners.add((a) => send('stats:update', a))
     memory = new MemoryService(store, registry, (items, s) => send('mem:changed', items, s))
     runs = new RunManager(store, registry, {
       events: (env) => send('chat:events', env),
@@ -264,7 +277,11 @@ else {
     setupMenu()
     registerIpc()
     createWindow()
-    void registry.detectAll()
+    // Keep the first paint light: agent detection and the history scan start after the window is up.
+    win?.webContents.once('did-finish-load', () => {
+      setTimeout(() => void registry.detectAll(), 700)
+      setTimeout(() => void stats.scan(), 6000)
+    })
     app.on('activate', () => BrowserWindow.getAllWindows().length === 0 && createWindow())
   })
 

@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { useApp } from '@/lib/store'
-import { Toasts } from '@/ui'
+import { Spinner, Toasts } from '@/ui'
 import { Sidebar } from '@/features/Sidebar'
 import { ChatView } from '@/features/ChatView'
-import { ProvidersView } from '@/features/ProvidersView'
-import { SkillsView } from '@/features/SkillsView'
-import { SettingsView } from '@/features/SettingsView'
+const ProvidersView = lazy(() => import('@/features/ProvidersView').then((m) => ({ default: m.ProvidersView })))
+const SkillsView = lazy(() => import('@/features/SkillsView').then((m) => ({ default: m.SkillsView })))
+const SettingsView = lazy(() => import('@/features/SettingsView').then((m) => ({ default: m.SettingsView })))
 import { ActivityPanel } from '@/features/ActivityPanel'
-import { TerminalPanel } from '@/features/TerminalPanel'
+const AnalyticsView = lazy(() => import('@/features/AnalyticsView'))
+const BrainView = lazy(() => import('@/features/BrainView'))
+const TerminalPanel = lazy(() => import('@/features/TerminalPanel').then((m) => ({ default: m.TerminalPanel })))
 import { CommandPalette } from '@/features/CommandPalette'
 import { PanelLeft } from 'lucide-react'
 import { IconButton } from '@/ui'
@@ -95,10 +97,34 @@ export default function App() {
   useRipple()
   useShortcuts(toggleSidebar)
   const [booted, setBooted] = useState(false)
+  const termOpen = useApp((s) => s.panels.terminal)
+  const [termMounted, setTermMounted] = useState(false)
+  const pendingCmd = useRef<string | null>(null)
+  // The terminal (xterm + node-pty) only loads the first time it is opened.
+  useEffect(() => { if (termOpen) setTermMounted(true) }, [termOpen])
   useEffect(() => {
-    void useApp.getState().boot().then(() => setBooted(true))
+    const h = (e: Event) => {
+      if (termMounted) return
+      pendingCmd.current = (e as CustomEvent<string>).detail
+      useApp.setState((s) => ({ panels: { ...s.panels, terminal: true } }))
+      setTermMounted(true)
+      setTimeout(() => { if (pendingCmd.current) window.dispatchEvent(new CustomEvent('clivra:terminal-type', { detail: pendingCmd.current })); pendingCmd.current = null }, 900)
+    }
+    window.addEventListener('clivra:terminal-type', h)
+    return () => window.removeEventListener('clivra:terminal-type', h)
+  }, [termMounted])
+  useEffect(() => {
+    const t0 = (window as unknown as { __t0?: number }).__t0 ?? performance.now()
+    void useApp.getState().boot().then(async () => {
+      // Let the logo animation play at least once so the open never feels like a flash.
+      const wait = Math.max(0, 1500 - (performance.now() - t0))
+      ;(window as unknown as { __splash?: { set(p: number, m: string): void } }).__splash?.set(100, 'Ready')
+      await new Promise((r) => setTimeout(r, wait))
+      setBooted(true)
+      requestAnimationFrame(() => requestAnimationFrame(() => (window as unknown as { __splash?: { done(): void } }).__splash?.done()))
+    })
   }, [])
-  if (!ready || !booted) return <div className="grid h-full place-items-center"><div className="skeleton size-10 rounded-2xl" /></div>
+  if (!ready || !booted) return null
   return (
     <MotionConfig reducedMotion={motionLevel === 'full' ? 'user' : 'always'}>
       <div className="flex h-full overflow-hidden">
@@ -115,7 +141,7 @@ export default function App() {
                       <div className={`drag flex h-11 shrink-0 items-center px-3 ${!sidebarOpen && platform === 'darwin' ? 'pl-[84px]' : ''}`}>
                         {!sidebarOpen && <IconButton label="Show sidebar" onClick={toggleSidebar}><PanelLeft size={17} /></IconButton>}
                       </div>
-                      <div className="min-h-0 flex-1">{view === 'providers' ? <ProvidersView /> : view === 'skills' ? <SkillsView /> : <SettingsView />}</div>
+                      <div className="min-h-0 flex-1"><Suspense fallback={<div className="grid h-full place-items-center"><Spinner size={20} /></div>}>{view === 'providers' ? <ProvidersView /> : view === 'skills' ? <SkillsView /> : view === 'analytics' ? <AnalyticsView /> : view === 'brain' ? <BrainView /> : <SettingsView />}</Suspense></div>
                     </>
                   )}
                 </motion.div>
@@ -123,7 +149,7 @@ export default function App() {
             </div>
             <ActivityPanel />
           </div>
-          <TerminalPanel />
+          {termMounted && <Suspense fallback={null}><TerminalPanel /></Suspense>}
         </main>
       </div>
       <CommandPalette />

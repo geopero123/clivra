@@ -62,6 +62,12 @@ export function AgentActivity() {
                 </motion.div>
               </AnimatePresence>
             </div>
+            {(live.usage?.outputTokens || live.usage?.inputTokens) && (
+              <span className="flex items-center gap-1.5 rounded-full bg-raised px-2 py-0.5 font-mono text-[11px] text-muted" title="Tokens used so far in this run">
+                <span className="blob loop inline-block size-2.5" style={{ ['--c' as string]: 'var(--cyan, #4cc9f0)' }} />
+                {((live.usage?.inputTokens ?? 0) + (live.usage?.outputTokens ?? 0)).toLocaleString()} tok{live.usage?.costUsd ? ` · $${live.usage.costUsd.toFixed(3)}` : ''}
+              </span>
+            )}
             {tools > 1 && <span className="rounded-full bg-raised px-2 py-0.5 text-[11px] text-muted">{tools} running</span>}
             <span className="font-mono text-[11.5px] tabular-nums text-faint">{duration(now - live.startedAt)}</span>
             <div className="wave-line loop pointer-events-none absolute inset-x-0 bottom-0" />

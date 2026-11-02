@@ -130,6 +130,70 @@ export interface StoredMessage {
   createdAt: number
 }
 
+/** One row per local day, provider and model, aggregated from each CLI's own history. */
+export interface DayStat {
+  day: string // YYYY-MM-DD (local)
+  provider: ProviderId
+  model: string
+  prompts: number
+  replies: number
+  tin: number
+  tout: number
+  cache: number
+  cost: number
+}
+
+export interface SessionStat {
+  provider: ProviderId
+  id: string
+  start: number
+  end: number
+  project: string
+  prompts: number
+  tokens: number
+}
+
+export interface SourceInfo {
+  provider: ProviderId
+  available: boolean
+  files: number
+  sessions: number
+  note?: string
+}
+
+export interface Analytics {
+  generatedAt: number
+  scanning: boolean
+  progress: { done: number; total: number }
+  sources: SourceInfo[]
+  days: DayStat[]
+  /** prompts by [weekday 0=Sun][hour] */
+  hours: number[][]
+  tools: { name: string; provider: ProviderId; count: number }[]
+  sessions: SessionStat[]
+  clivra: { runs: number; errors: number; cancelled: number; chats: number; messages: number; approvals: number; denied: number }
+}
+
+export type BrainKind = 'core' | 'provider' | 'project' | 'model' | 'tool' | 'memory' | 'category' | 'chat'
+export interface BrainNode {
+  id: string
+  kind: BrainKind
+  label: string
+  weight: number
+  detail?: string
+  provider?: ProviderId
+  ref?: string
+}
+export interface BrainLink {
+  a: string
+  b: string
+  weight: number
+}
+export interface BrainGraph {
+  nodes: BrainNode[]
+  links: BrainLink[]
+}
+
 export interface SearchHit {
   conversationId: string
   messageId: string

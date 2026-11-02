@@ -161,12 +161,13 @@ export function Popover({
           {open && pos && (
             <motion.div
               ref={panel}
+              data-popover=""
               variants={pop}
               initial="hidden"
               animate="show"
               exit="exit"
               style={{ position: 'fixed', top: pos.top, bottom: pos.bottom, left: pos.left, right: pos.right, transformOrigin: pos.origin, maxHeight: pos.maxH, zIndex: 60 }}
-              className={cn('no-drag flex min-w-[220px] flex-col overflow-hidden rounded-2xl border border-line-strong bg-[var(--glass)] shadow-[var(--shadow-pop)] backdrop-blur-xl', className)}
+              className={cn('no-drag flex min-w-[220px] flex-col overflow-hidden rounded-2xl border border-line-strong bg-[var(--glass)] shadow-[var(--shadow-pop)]', className)}
             >
               {children}
             </motion.div>
@@ -238,7 +239,7 @@ export function Toasts() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 40, scale: 0.96, transition: { duration: 0.16 } }}
             transition={spring}
-            className="pointer-events-auto flex gap-3 rounded-2xl border border-line-strong bg-[var(--glass)] p-3.5 shadow-[var(--shadow-pop)] backdrop-blur-xl"
+            className="pointer-events-auto flex gap-3 rounded-2xl border border-line-strong bg-[var(--glass)] p-3.5 shadow-[var(--shadow-pop)]"
           >
             <span className={cn('mt-1 size-2 shrink-0 rounded-full', t.kind === 'error' ? 'bg-danger' : t.kind === 'success' ? 'bg-ok' : t.kind === 'warning' ? 'bg-warn' : 'bg-accent')} />
             <div className="selectable min-w-0 flex-1">

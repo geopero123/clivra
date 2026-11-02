@@ -34,6 +34,21 @@ new agents' instructions. Off by default because the excerpt goes to whichever p
 Verified: redaction, parsing, model choice, storage (unit tests) and that a live run fails cleanly; a successful
 live summary was not possible here (OpenCode free tier exhausted).
 
+## Analytics, streaks and the Brain
+
+- **Analytics** reads the history each agent already keeps, so it includes work done outside Clivra:
+  Claude Code transcripts (`~/.claude/projects/**/*.jsonl`), Codex session files (`~/.codex/sessions/**/rollout-*.jsonl`)
+  and OpenCode's database (opened read-only). It shows streaks (current, longest, active days, a year calendar),
+  tokens, chats, prompts, cache hits, reported cost, models, tools, projects and when you work.
+  Scans run in the background after the window is up and are cached per file (size + mtime), so repeat scans are near-instant.
+  Verified on real Claude Code and OpenCode history; the Codex reader follows Codex's rollout format but was only tested against a fixture.
+- **Brain** is a neuron graph of everything the app knows: agents, models, projects, tools, saved memories and chats.
+  Pulses travel along synapses and fire for real while an agent is running.
+- **Startup** shows a liquid logo animation from an inline splash that paints before any script loads, reports real
+  boot stages, and reveals the app with an iris. Heavy views (Analytics, Brain, Settings, terminal) load lazily, agent
+  detection and the history scan start after first paint.
+- `demo/` contains a phone-friendly HTML/CSS preview (`npm run demo` rebuilds it, inlining the real Brain engine).
+
 ## Architecture
 
 ```

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS activity (
   id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id TEXT NOT NULL, ts INTEGER NOT NULL,
   kind TEXT NOT NULL, summary TEXT NOT NULL, status TEXT NOT NULL, provider TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS native_files (path TEXT PRIMARY KEY, size INTEGER NOT NULL, mtime INTEGER NOT NULL, summary TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS memories (
   id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL,
   conversation_id TEXT, provider TEXT, updated_at INTEGER NOT NULL, UNIQUE(category, key)
@@ -200,6 +201,33 @@ export class Store {
       hits.push({ conversationId: r.cid, messageId: r.mid, title: r.title, snippet: r.snip, updatedAt: r.updated })
     }
     return hits
+  }
+
+  // ---- native history cache + app stats ------------------------------
+  getNative(path: string): { size: number; mtime: number; summary: any } | null {
+    const r = this.db.prepare(`SELECT * FROM native_files WHERE path=?`).get(path) as Row | undefined
+    if (!r) return null
+    try {
+      return { size: r.size, mtime: r.mtime, summary: JSON.parse(r.summary) }
+    } catch {
+      return null
+    }
+  }
+
+  setNative(path: string, size: number, mtime: number, summary: unknown): void {
+    this.db.prepare(`INSERT INTO native_files(path,size,mtime,summary) VALUES(?,?,?,?) ON CONFLICT(path) DO UPDATE SET size=excluded.size, mtime=excluded.mtime, summary=excluded.summary`).run(path, size, mtime, JSON.stringify(summary))
+  }
+
+  pruneNative(keep: Set<string>): void {
+    for (const r of this.db.prepare(`SELECT path FROM native_files`).all() as Row[]) if (!keep.has(r.path)) this.db.prepare(`DELETE FROM native_files WHERE path=?`).run(r.path)
+  }
+
+  clivraStats(): { runs: number; errors: number; cancelled: number; chats: number; messages: number; approvals: number; denied: number } {
+    const m = this.db.prepare(`SELECT COUNT(*) runs, COALESCE(SUM(status='error'),0) errors, COALESCE(SUM(status='cancelled'),0) cancelled FROM messages WHERE role='assistant'`).get() as Row
+    const c = (this.db.prepare(`SELECT COUNT(*) n FROM conversations`).get() as Row).n
+    const msgs = (this.db.prepare(`SELECT COUNT(*) n FROM messages`).get() as Row).n
+    const a = this.db.prepare(`SELECT COALESCE(SUM(status='requested'),0) approvals, COALESCE(SUM(status='denied'),0) denied FROM activity WHERE kind='permission'`).get() as Row
+    return { runs: m.runs, errors: m.errors, cancelled: m.cancelled, chats: c, messages: msgs, approvals: a.approvals, denied: a.denied }
   }
 
   // ---- memory ---------------------------------------------------------
