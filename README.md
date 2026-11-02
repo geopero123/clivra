@@ -23,6 +23,17 @@ Provider **sessions are never shared**. Switching provider mid-conversation star
 provider and passes the earlier conversation as a clearly labelled transcript (a notice is shown in the chat).
 Switching back resumes the original session.
 
+## Memory (opt-in)
+
+Settings → Memory. When enabled, after a Claude Code / Codex run finishes, OpenCode's strongest model
+(`Auto` = highest-ranked reasoning model by reported cost and context, or one you choose) reads a **redacted**
+excerpt of that turn and saves durable facts — profile, hardware, preferences, location, projects — to the local
+database. Secrets (API keys, tokens, private keys, passwords) are stripped first, the summarizer session has all
+tools denied and no project directory, and every fact can be deleted. Optionally the saved facts are added to
+new agents' instructions. Off by default because the excerpt goes to whichever provider OpenCode uses.
+Verified: redaction, parsing, model choice, storage (unit tests) and that a live run fails cleanly; a successful
+live summary was not possible here (OpenCode free tier exhausted).
+
 ## Architecture
 
 ```

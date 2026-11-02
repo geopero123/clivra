@@ -1,5 +1,5 @@
 import type {
-  ActivityEntry, Attachment, ConversationMeta, GitInfo, ModelInfo, PermissionMode, Project, ProviderId,
+  ActivityEntry, Attachment, MemoryItem, MemoryStatus, ConversationMeta, GitInfo, ModelInfo, PermissionMode, Project, ProviderId,
   ProviderStatus, SearchHit, SendRequest, Settings, SkillInfo, StoredMessage
 } from './types'
 import type { RunEnvelope } from './events'
@@ -48,6 +48,14 @@ export interface ClivraAPI {
     remove(id: string): Promise<void>
     git(path: string): Promise<GitInfo>
     gitDiff(path: string): Promise<string>
+  }
+  memory: {
+    list(): Promise<MemoryItem[]>
+    remove(id: number): Promise<void>
+    clear(): Promise<void>
+    summarize(conversationId: string): Promise<MemoryStatus>
+    status(): Promise<MemoryStatus>
+    onChanged(cb: (items: MemoryItem[], status: MemoryStatus) => void): () => void
   }
   settings: {
     get(): Promise<Settings>

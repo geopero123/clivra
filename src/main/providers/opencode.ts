@@ -207,6 +207,7 @@ export const opencodeAdapter: ProviderAdapter = {
           provider: 'opencode',
           efforts: Object.keys(m.variants ?? {}),
           isDefault: res.default?.[p.id] === m.id,
+          rank: m.capabilities?.reasoning ? Math.log10(1 + (m.cost?.output ?? 0)) * 10 + Math.log10(1 + (m.limit?.context ?? 0)) : undefined,
           supportsImages: !!m.capabilities?.input?.image
         })
       }

@@ -5,6 +5,7 @@ import type { ConversationMeta, SendRequest, StoredMessage, UsageInfo } from '@s
 import type { Store } from './db'
 import type { ProviderRegistry } from './registry'
 import type { RunHandle } from '../providers/types'
+import { memoryPrompt } from './memory'
 
 interface ActiveRun {
   runId: string
@@ -61,6 +62,7 @@ export class RunManager {
     // that receives a clearly labelled transcript of the conversation so far.
     const sessionId = conv.sessions[req.provider]
     let instructions = settings.instructions
+    if (settings.memory.inject) instructions = [instructions, memoryPrompt(this.store.listMemories())].filter(Boolean).join('\n\n')
     const handoff = !sessionId && history.length > 0
     if (handoff) instructions = [instructions, buildTranscript(history)].filter(Boolean).join('\n\n')
 

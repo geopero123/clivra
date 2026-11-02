@@ -14,6 +14,7 @@ import { TerminalService } from './services/terminal'
 import { gitDiff, gitInfo } from './services/git'
 import { killAllTracked } from './services/proc'
 import { toMarkdown } from './services/export'
+import { MemoryService } from './services/memory'
 
 const isDev = !app.isPackaged && !!process.env.ELECTRON_RENDERER_URL
 let win: BrowserWindow | null = null
@@ -21,6 +22,7 @@ let store: Store
 let registry: ProviderRegistry
 let runs: RunManager
 let terminals: TerminalService
+let memory: MemoryService
 let quitting = false
 
 const send = (channel: string, ...args: unknown[]) => {
@@ -181,6 +183,13 @@ function registerIpc(): void {
   handle('proj:git', (_e, p: string) => gitInfo(assertDir(p)))
   handle('proj:gitDiff', (_e, p: string) => gitDiff(assertDir(p)))
 
+  // memory
+  handle('mem:list', () => store.listMemories())
+  handle('mem:remove', (_e, id: number) => (store.deleteMemory(Number(id)), send('mem:changed', store.listMemories(), memory.getStatus())))
+  handle('mem:clear', () => (store.clearMemories(), send('mem:changed', store.listMemories(), memory.getStatus())))
+  handle('mem:summarize', (_e, id: string) => memory.summarize(id))
+  handle('mem:status', () => memory.getStatus())
+
   // settings
   handle('settings:get', () => store.getSettings())
   handle('settings:set', (_e, patch: Partial<Settings>) => {
@@ -240,11 +249,13 @@ else {
     registry = new ProviderRegistry(store)
     registry.listeners.add((s) => send('providers:status', s))
     terminals = new TerminalService(() => (win && !win.isDestroyed() ? win.webContents : null))
+    memory = new MemoryService(store, registry, (items, s) => send('mem:changed', items, s))
     runs = new RunManager(store, registry, {
       events: (env) => send('chat:events', env),
       conversationChanged: (c) => send('conv:changed', c),
       permissionRequested: (c, title) => notify(c.title, `Approval needed: ${title}`, 'onPermission'),
       runFinished: (c, outcome, attention) => {
+        if (outcome === 'complete') memory.enqueue(c.id)
         if (outcome === 'complete' && attention) notify(c.title, 'Finished', 'onComplete')
         if (outcome === 'error') notify(c.title, 'The run ended with an error', 'onComplete')
       }

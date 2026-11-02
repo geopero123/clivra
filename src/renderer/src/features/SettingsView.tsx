@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Bell, Cable, Cpu, FolderGit2, Keyboard, Palette, RefreshCw, ShieldCheck, Sparkles, SquareTerminal, Trash2, Plus, Gauge } from 'lucide-react'
-import type { ProviderId, Settings } from '@shared/types'
-import { PROVIDER_IDS } from '@shared/types'
+import { Brain, Bell, Cable, Cpu, FolderGit2, Keyboard, Palette, RefreshCw, ShieldCheck, Sparkles, SquareTerminal, Trash2, Plus, Gauge } from 'lucide-react'
+import type { MemoryItem, MemoryStatus, ProviderId, Settings } from '@shared/types'
+import { MEMORY_CATEGORIES, PROVIDER_IDS } from '@shared/types'
 import { cn } from '@/lib/cn'
 import { base, spring } from '@/lib/motion'
 import { useApp } from '@/lib/store'
@@ -15,6 +15,7 @@ const SECTIONS = [
   { id: 'providers', label: 'AI providers', icon: Cable },
   { id: 'models', label: 'Models & reasoning', icon: Cpu },
   { id: 'skills', label: 'Skills', icon: Sparkles },
+  { id: 'memory', label: 'Memory', icon: Brain },
   { id: 'permissions', label: 'Permissions', icon: ShieldCheck },
   { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
   { id: 'workspaces', label: 'Workspaces', icon: FolderGit2 },
@@ -126,6 +127,61 @@ function Models({ s, set }: { s: Settings; set: (p: Partial<Settings>) => void }
   )
 }
 
+function Memory({ s, set }: { s: Settings; set: (p: Partial<Settings>) => void }) {
+  const models = useApp((x) => x.models.opencode)
+  const load = useApp((x) => x.loadModels)
+  const activeId = useApp((x) => x.activeId)
+  const providers = useApp((x) => x.providers)
+  const [items, setItems] = useState<MemoryItem[]>([])
+  const [status, setStatus] = useState<MemoryStatus>({ running: false })
+  useEffect(() => {
+    void load('opencode')
+    void window.clivra.memory.list().then(setItems)
+    void window.clivra.memory.status().then(setStatus)
+    return window.clivra.memory.onChanged((i, st) => (setItems(i), setStatus(st)))
+  }, [load])
+  const oc = providers.find((p) => p.id === 'opencode')
+  const best = models?.filter((m) => m.rank !== undefined).sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0))[0]
+  const m = s.memory
+  const up = (p: Partial<Settings['memory']>) => set({ memory: { ...m, ...p } })
+  return (
+    <>
+      <Section title="Automatic memory">
+        <Row title="Summarize finished chats" desc="After a Claude Code or Codex run finishes, OpenCode’s strongest model reads a redacted excerpt of that turn and saves durable facts about you — profile, hardware, preferences, location, projects. Off by default."><Switch checked={m.enabled} onChange={(v) => up({ enabled: v })} label="Enable memory" disabled={oc?.state !== 'ready'} /></Row>
+        {oc?.state !== 'ready' && <div className="px-4 py-3 text-[12.5px] text-warn">OpenCode must be installed and signed in to a model provider for this.</div>}
+        <Row title="Summarizer model" desc={best ? `Auto picks the highest-ranked reasoning model OpenCode reports (currently ${best.name}).` : 'Auto picks the strongest model OpenCode reports.'}>
+          <Select value={m.model} onChange={(v) => up({ model: v })} disabled={!models?.length} options={[{ value: 'auto', label: 'Auto (best available)' }, ...(models ?? []).map((x) => ({ value: x.id, label: `${x.group ? x.group + ' · ' : ''}${x.name}` }))]} />
+        </Row>
+        <Row title="Use memory in new chats" desc="Adds the saved facts to each agent’s instructions so it already knows your setup."><Switch checked={m.inject} onChange={(v) => up({ inject: v })} label="Use memory in chats" /></Row>
+        <div className="space-y-1 px-4 py-3 text-[12px] leading-relaxed text-muted">
+          <p>Privacy: the excerpt (your last message, the reply and short tool output) is sent to whichever model provider OpenCode uses, after secrets like API keys, tokens and private keys are stripped. The summarizer runs in a session that can’t read files or run commands. Facts are stored only on this computer and can be removed below.</p>
+          {status.running && <p className="text-accent">Summarizing…</p>}
+          {status.lastError && <p className="text-danger">Last run failed: {status.lastError}</p>}
+          {!status.running && !status.lastError && status.lastRun && <p>Last run {new Date(status.lastRun).toLocaleTimeString()}: {status.lastAdded ?? 0} fact(s) saved{status.model ? ` with ${status.model}` : ''}.</p>}
+        </div>
+      </Section>
+      <Section title={`Saved facts · ${items.length}`} aside={<div className="flex gap-2"><Button size="sm" disabled={!activeId || status.running || oc?.state !== 'ready'} onClick={() => activeId && void window.clivra.memory.summarize(activeId)}>Summarize current chat</Button><Button size="sm" variant="ghost" disabled={!items.length} onClick={() => void window.clivra.memory.clear()}><Trash2 size={13} /> Clear all</Button></div>}>
+        {items.length === 0 && <div className="p-8 text-center text-[13px] text-muted">Nothing saved yet.</div>}
+        {MEMORY_CATEGORIES.map((cat) => {
+          const list = items.filter((i) => i.category === cat)
+          if (!list.length) return null
+          return (
+            <div key={cat} className="border-b border-line last:border-0">
+              <div className="px-4 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wider text-faint">{cat}</div>
+              {list.map((i) => (
+                <div key={i.id} className="group/m flex items-start gap-3 px-4 py-2">
+                  <div className="min-w-0 flex-1"><span className="font-mono text-[12px] text-muted">{i.key}</span><div className="selectable text-[13px]">{i.value}</div></div>
+                  <button aria-label={`Forget ${i.key}`} onClick={() => void window.clivra.memory.remove(i.id)} className="mt-0.5 grid size-6 place-items-center rounded-md text-faint opacity-0 hover:bg-sunken hover:text-danger group-hover/m:opacity-100 focus-visible:opacity-100"><Trash2 size={13} /></button>
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </Section>
+    </>
+  )
+}
+
 function Perms({ s, set }: { s: Settings; set: (p: Partial<Settings>) => void }) {
   return (
     <Section title="Default approval level">
@@ -180,6 +236,7 @@ export function SettingsView() {
     case 'providers': body = <Providers s={settings} set={set} />; break
     case 'models': body = <Models s={settings} set={set} />; break
     case 'skills': body = <Section title="Skills"><div className="p-5 text-[13px] text-muted">Skills are discovered live from each provider for your current project. <Button className="ml-2" size="sm" onClick={() => setView('skills')}>Open Skills</Button></div></Section>; break
+    case 'memory': body = <Memory s={settings} set={set} />; break
     case 'permissions': body = <Perms s={settings} set={set} />; break
     case 'terminal': body = <TerminalSettings s={settings} set={set} />; break
     case 'workspaces': body = <Workspaces />; break

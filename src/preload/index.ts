@@ -42,6 +42,14 @@ const api: ClivraAPI = {
     git: (p) => inv('proj:git', p),
     gitDiff: (p) => inv('proj:gitDiff', p)
   },
+  memory: {
+    list: () => inv('mem:list'),
+    remove: (id) => inv('mem:remove', id),
+    clear: () => inv('mem:clear'),
+    summarize: (id) => inv('mem:summarize', id),
+    status: () => inv('mem:status'),
+    onChanged: (cb) => on('mem:changed', cb)
+  },
   settings: { get: () => inv('settings:get'), set: (p) => inv('settings:set', p) },
   terminal: {
     create: (cwd) => inv('term:create', cwd),

@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { randomUUID } from 'node:crypto'
 import type {
-  ActivityEntry, Attachment, ConversationMeta, PermissionMode, Project, ProviderId, SearchHit, Settings, StoredMessage, UsageInfo
+  ActivityEntry, Attachment, MemoryItem, ConversationMeta, PermissionMode, Project, ProviderId, SearchHit, Settings, StoredMessage, UsageInfo
 } from '@shared/types'
 import { DEFAULT_SETTINGS } from '@shared/types'
 import type { Block } from '@shared/events'
@@ -30,6 +30,10 @@ CREATE VIRTUAL TABLE IF NOT EXISTS message_fts USING fts5(message_id UNINDEXED, 
 CREATE TABLE IF NOT EXISTS activity (
   id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id TEXT NOT NULL, ts INTEGER NOT NULL,
   kind TEXT NOT NULL, summary TEXT NOT NULL, status TEXT NOT NULL, provider TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS memories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL,
+  conversation_id TEXT, provider TEXT, updated_at INTEGER NOT NULL, UNIQUE(category, key)
 );
 CREATE INDEX IF NOT EXISTS idx_activity_conv ON activity(conversation_id, ts);
 `
@@ -196,6 +200,30 @@ export class Store {
       hits.push({ conversationId: r.cid, messageId: r.mid, title: r.title, snippet: r.snip, updatedAt: r.updated })
     }
     return hits
+  }
+
+  // ---- memory ---------------------------------------------------------
+  listMemories(): MemoryItem[] {
+    return (this.db.prepare(`SELECT * FROM memories ORDER BY category, updated_at DESC`).all() as Row[]).map((r) => ({
+      id: r.id, category: r.category, key: r.key, value: r.value, conversationId: r.conversation_id, provider: r.provider, updatedAt: r.updated_at
+    }))
+  }
+
+  upsertMemory(m: { category: string; key: string; value: string; conversationId: string | null; provider: ProviderId | null }): void {
+    this.db
+      .prepare(`INSERT INTO memories(category,key,value,conversation_id,provider,updated_at) VALUES(?,?,?,?,?,?)
+                ON CONFLICT(category,key) DO UPDATE SET value=excluded.value, conversation_id=excluded.conversation_id, provider=excluded.provider, updated_at=excluded.updated_at`)
+      .run(m.category, m.key, m.value, m.conversationId, m.provider, Date.now())
+    // Hard cap so the table can never grow without bound.
+    this.db.prepare(`DELETE FROM memories WHERE id IN (SELECT id FROM memories ORDER BY updated_at DESC LIMIT -1 OFFSET 200)`).run()
+  }
+
+  deleteMemory(id: number): void {
+    this.db.prepare(`DELETE FROM memories WHERE id=?`).run(id)
+  }
+
+  clearMemories(): void {
+    this.db.prepare(`DELETE FROM memories`).run()
   }
 
   // ---- activity -------------------------------------------------------

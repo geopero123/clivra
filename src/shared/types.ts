@@ -52,6 +52,8 @@ export interface ModelInfo {
   defaultEffort?: string
   isDefault?: boolean
   supportsImages?: boolean
+  /** Capability heuristic (higher = stronger); only set where the provider reports cost/context. */
+  rank?: number
 }
 
 export interface SkillInfo {
@@ -159,6 +161,28 @@ export interface Settings {
   terminal: { fontSize: number; shell: string }
   notifications: { onComplete: boolean; onPermission: boolean }
   sidebar: { collapsed: boolean; width: number }
+  memory: { enabled: boolean; model: string; inject: boolean }
+}
+
+export const MEMORY_CATEGORIES = ['profile', 'hardware', 'preferences', 'location', 'projects', 'other'] as const
+export type MemoryCategory = (typeof MEMORY_CATEGORIES)[number]
+
+export interface MemoryItem {
+  id: number
+  category: MemoryCategory
+  key: string
+  value: string
+  conversationId: string | null
+  provider: ProviderId | null
+  updatedAt: number
+}
+
+export interface MemoryStatus {
+  running: boolean
+  lastRun?: number
+  lastError?: string
+  lastAdded?: number
+  model?: string
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -169,7 +193,8 @@ export const DEFAULT_SETTINGS: Settings = {
   skills: { disabled: {} },
   terminal: { fontSize: 13, shell: '' },
   notifications: { onComplete: true, onPermission: true },
-  sidebar: { collapsed: false, width: 288 }
+  sidebar: { collapsed: false, width: 288 },
+  memory: { enabled: false, model: 'auto', inject: false }
 }
 
 export interface SendRequest {
